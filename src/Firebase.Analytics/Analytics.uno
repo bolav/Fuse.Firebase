@@ -44,8 +44,8 @@ namespace Firebase.Analytics
         @{
             Bundle bundle = new Bundle();
 
-            for (int = 0; i < len; i++) {
-                bundle.putString(keys[i], vals[i]);
+            for (int i = 0; i < len; i++) {
+                bundle.putString(keys.get(i), vals.get(i));
             }
             ((FirebaseAnalytics)@{_handle}).logEvent(name, bundle);
         @}
@@ -67,7 +67,7 @@ namespace Firebase.Analytics
     {
         public static void Init() {}
         public static void LogEvent(string name, string[] keys, string[] vals, int len) {
-            debug_log "LogEvent: " + name;
+            debug_log "Firebase.Analytics.AnalyticsService.LogEvent: " + name;
         }
     }
 }

@@ -30,6 +30,7 @@ namespace Firebase.Authentication
     {
         internal static event Action UserChanged;
         internal static event Action<int, string> OnError;
+        internal static event Action<string, string> OnGoogleAuth;
 
         static Dictionary<AuthProviderName, AuthProvider> AuthProviders = new Dictionary<AuthProviderName, AuthProvider>();
         static AuthProviderName CurrentProvider { public get; private set; }
@@ -183,6 +184,14 @@ namespace Firebase.Authentication
                 handler(code, message);
         }
 
+        internal static void GoogleAuth(string idToken, string accessToken)
+        {
+            var handler = OnGoogleAuth;
+            if (handler!=null)
+                OnGoogleAuth(idToken, accessToken);
+        }
+
+
         internal static void SignOut()
         {
             SignOutFirebase();
@@ -244,6 +253,7 @@ namespace Firebase.Authentication
         internal static object Credential;
         internal static event Action UserChanged;
         internal static event Action<int, string> OnError;
+        internal static event Action<string, string> OnGoogleAuth;
         public static void Init() { }
         internal static void SignOut() { }
         public static Promise<string> ReAuthenticate(string email, string password) { return null; }
@@ -254,6 +264,7 @@ namespace Firebase.Authentication
     static internal class User
     {
         internal static object GetCurrent() { return null; }
+        internal static string GetUid(object obj) { return null; }
         internal static string GetName(object obj) { return null; }
         internal static string GetEmail(object obj) { return null; }
         internal static string GetPhotoUrl(object obj) { return null; }

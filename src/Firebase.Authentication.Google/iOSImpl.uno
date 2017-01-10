@@ -59,7 +59,7 @@ namespace Firebase.Authentication.Google
 
 
 		[Foreign(Language.ObjC)]
-		[Require("Entity","Firebase.Authentication.Google.JS.GoogleModule.Auth(string,string)")]
+        [Require("Entity","Firebase.Authentication.Google.JS.GoogleModule.Auth(string,string)")]
 
 		static ObjC.Object Create()
 		@{
