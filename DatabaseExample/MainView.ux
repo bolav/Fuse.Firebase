@@ -1,0 +1,20 @@
+<App Background="#eee">
+	<DockPanel>
+		<JavaScript>
+            console.log("Starting JS!");
+            var FireDb = require("Firebase/Database");
+            FireDb.on('data', function (path, s) {
+                console.log("Got emitted data: " + s);
+            })
+            console.log("firedb: " + FireDb);
+
+            module.exports.doIt = function() {
+                FireDb.listen('cabins');
+                // FBAnalytics.logIt("Wooo!");
+            };
+        </JavaScript>
+		<StackPanel>
+            <Button Text="Do It!" Clicked="{doIt}" Height="100"/>
+		</StackPanel>
+	</DockPanel>
+</App>
