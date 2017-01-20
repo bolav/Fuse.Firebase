@@ -56,6 +56,7 @@ namespace Firebase.Database.JS
             }
             else {
                 debug_log("Push: Unimplemented Javascript type");
+                debug_log args[1];
                 throw new Exception("Push: Unimplemented Javascript type");
             }
             return null;
@@ -64,6 +65,7 @@ namespace Firebase.Database.JS
         object Save(Fuse.Scripting.Context context, object[] args)
         {
             var path = args[0].ToString();
+            var a = args[1];
             if (args[1] is Fuse.Scripting.Object) {
                 var p = (Fuse.Scripting.Object)args[1];
                 var keys = p.Keys;
@@ -74,8 +76,22 @@ namespace Firebase.Database.JS
                 DatabaseService.Save(path, keys, objs, keys.Length);
                 return null;
             }
+            else if (args[1] is string) {
+                DatabaseService.Save(path, args[1] as string);
+                return null;
+            }
+            else if (args[1] is double || args[1] is int) {
+                DatabaseService.Save(path, Marshal.ToDouble(args[1]));
+                return null;
+            }
+            else if (args[1] == null) {
+                DatabaseService.SaveNull(path);
+                return null;
+            }
             else {
                 debug_log("Save: Unimplemented Javascript type");
+                debug_log args[1];
+                debug_log args[1].GetType();
                 throw new Exception("Save: Unimplemented Javascript type");
             }
             return null;
