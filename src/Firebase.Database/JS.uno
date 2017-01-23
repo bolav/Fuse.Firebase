@@ -49,7 +49,12 @@ namespace Firebase.Database.JS
                 var keys = p.Keys;
                 string[] objs = new string[keys.Length];
                 for (int i=0; i < keys.Length; i++) {
-                    objs[i] = p[keys[i]].ToString();
+                    if (p[keys[i]] == null) {
+                        objs[i] = null;
+                    }
+                    else {
+                        objs[i] = p[keys[i]].ToString();
+                    }
                 }
                 DatabaseService.Save(path, keys, objs, keys.Length);
                 return;
