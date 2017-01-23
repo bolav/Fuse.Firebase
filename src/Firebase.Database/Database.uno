@@ -62,7 +62,12 @@ namespace Firebase.Database
         @{
     		FIRDatabaseReference *ref = @{DatabaseService._handle:Get()};
     		[[ref child:path] observeEventType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot * _Nonnull snapshot) {
-    		  NSError *error;
+              if([snapshot.value isEqual:[NSNull null]]) {
+                f(path, nil);
+                return;
+              }
+
+              NSError *error;
     		  NSData *jsonData = [NSJSONSerialization dataWithJSONObject:snapshot.value
     		                                                options:(NSJSONWritingOptions)0
     		                                                  error:&error];
@@ -94,15 +99,13 @@ namespace Firebase.Database
             ref.child(path).addValueEventListener(dataListener);
         @}
 
+
         [Foreign(Language.ObjC)]
         extern(iOS)
-        public static string Push(string path, string[] keys, string[] vals, int len)
+        public static string NewChildId(string path)
         @{
             FIRDatabaseReference *ref = @{DatabaseService._handle:Get()};
-            NSDictionary *param = [NSDictionary dictionaryWithObjects:[vals copyArray] forKeys:[keys copyArray]];
-
             FIRDatabaseReference *_path = [[ref child:path] childByAutoId];
-            [_path setValue:param];
             return _path.key;
         @}
 
@@ -116,21 +119,75 @@ namespace Firebase.Database
             [[ref child:path] setValue:param];
         @}
 
+        [Foreign(Language.ObjC)]
+        extern(iOS)
+        public static void Save(string path, string[] array)
+        @{
+            FIRDatabaseReference *ref = @{DatabaseService._handle:Get()};
+            [[ref child:path] setValue:[array copyArray]];
+        @}
+
+        [Foreign(Language.ObjC)]
+        extern(iOS)
+        public static void Save(string path, string val)
+        @{
+            FIRDatabaseReference *ref = @{DatabaseService._handle:Get()};
+            [[ref child:path] setValue:val];
+        @}
+
+        [Foreign(Language.ObjC)]
+        extern(iOS)
+        public static void Save(string path, double val)
+        @{
+            FIRDatabaseReference *ref = @{DatabaseService._handle:Get()};
+            [[ref child:path] setValue:[NSNumber numberWithDouble:val]];
+        @}
+
+        [Foreign(Language.ObjC)]
+        extern(iOS)
+        public static void SaveNull(string path)
+        @{
+            FIRDatabaseReference *ref = @{DatabaseService._handle:Get()};
+            [[ref child:path] setValue:nil];
+        @}
+
+
+
 	}
 
     extern(!mobile)
     static class DatabaseService
     {
         public static void Init() {}
-        public static string Push(string path, string[] keys, string[] vals, int len)
+        public static string NewChildId(string path)
         {
-            debug_log "Push not implemented for desktop";
+            debug_log "NewChildId not implemented for desktop";
             return "unknown";
+        }
+        public static void Save() {
+            debug_log "Save not implemented for desktop";
         }
         public static void Save(string path, string[] keys, string[] vals, int len)
         {
-            debug_log "Save not implemented for desktop";
+            Save();
         }
+        public static void Save(string path, string[] array)
+        {
+            Save();
+        }
+        public static void Save(string path, string val)
+        {
+            Save();
+        }
+        public static void Save(string path, double val)
+        {
+            Save();
+        }
+        public static void SaveNull(string path)
+        {
+            Save();
+        }
+
         public static void Listen(string path, Action<string,string> f) 
         {
             debug_log "Listen not implemented for desktop";
@@ -164,11 +221,23 @@ namespace Firebase.Database
                 return;
               }
 
-    		  NSData *jsonData = [NSJSONSerialization dataWithJSONObject:snapshot.value
-    		                                                options:(NSJSONWritingOptions)0
-    		                                                  error:&error];
-    		  NSString *json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    		  @{Read:Of(_this).Resolve(string):Call(json)};
+              NSData *jsonData;
+              if ([snapshot.value isKindOfClass:[NSString class]]) {
+                NSString *jsonstring = [NSString stringWithFormat:@"\"%@\"", snapshot.value];
+                @{Read:Of(_this).Resolve(string):Call(jsonstring)};
+
+                // NSData *data = [snapshot.value dataUsingEncoding:NSUTF8StringEncoding];
+                // jsonData = [NSJSONSerialization JSONObjectWithData:data
+                //                                              options:(NSJSONWritingOptions)0
+                //                                                error:&error];
+              }
+              else {
+                jsonData = [NSJSONSerialization dataWithJSONObject:snapshot.value
+                                                              options:(NSJSONWritingOptions)0
+                                                                error:&error];
+                NSString *json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+                @{Read:Of(_this).Resolve(string):Call(json)};
+              }
 
     		} withCancelBlock:^(NSError * _Nonnull error) {
     			NSString *erstr = [NSString stringWithFormat:@"Firebase Read Error: %@", error.localizedDescription];
