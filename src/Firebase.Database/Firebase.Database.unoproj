@@ -1,6 +1,7 @@
 {
   "Projects": [
-      "../Firebase/Firebase.unoproj"
+      "../Firebase/Firebase.unoproj",
+      "../../lib2/Fuse.JSON/JSON.unoproj"
   ],
   "Packages": [
   	"Fuse",

@@ -45,9 +45,10 @@ namespace Firebase.Database
         extern(iOS)
         public static void iOSInit()
         @{
+            // XXX: Should be a compile-time option
+            [FIRDatabase database].persistenceEnabled = YES;
         	@{_handle:Set([[FIRDatabase database] reference])};
         @}
-
 
         [Foreign(Language.Java)]
         extern(android)
@@ -117,6 +118,15 @@ namespace Firebase.Database
             NSDictionary *param = [NSDictionary dictionaryWithObjects:[vals copyArray] forKeys:[keys copyArray]];
 
             [[ref child:path] setValue:param];
+        @}
+
+        [Foreign(Language.ObjC)]
+        extern(iOS)
+        public static void Save(string path, ObjC.Object value)
+        @{
+            FIRDatabaseReference *ref = @{DatabaseService._handle:Get()};
+
+            [[ref child:path] setValue:value];
         @}
 
         [Foreign(Language.ObjC)]

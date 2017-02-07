@@ -25,7 +25,6 @@ namespace Firebase.Database.JS
 			Resource.SetGlobalKey(_instance = this, "Firebase/Database");
 
             DatabaseService.Init();
-            // AddMember(new NativeFunction("logIt", LogIt));
 			var onData = new NativeEvent("onData");
 			On("data", onData);
 
@@ -43,7 +42,7 @@ namespace Firebase.Database.JS
             return new Read(path);
         }
 
-        void DoSave(string path, object arg) {
+        static void DoSave(string path, object arg) {
             if (arg is Fuse.Scripting.Object) {
                 var p = (Fuse.Scripting.Object)arg;
                 var keys = p.Keys;
@@ -87,23 +86,39 @@ namespace Firebase.Database.JS
             }
         }
 
-        object Push(Fuse.Scripting.Context context, object[] args)
+        static object Push(Fuse.Scripting.Context context, object[] args)
         {
             var path = args[0].ToString();
             var push_path = DatabaseService.NewChildId(path);
-            DoSave(path + "/" + push_path, args[1]);
+            if defined(iOS) {
+                DatabaseService.Save(
+                    path + "/" + push_path,
+                    JSON.ObjCObject.FromJSON(JSON.ScriptingValue.ToJSON(args[1]))
+                );
+            }
+            else {
+                DoSave(path + "/" + push_path, args[1]);
+            }
             return push_path;
         }
 
-        object Save(Fuse.Scripting.Context context, object[] args)
+        static object Save(Fuse.Scripting.Context context, object[] args)
         {
-            DoSave(args[0].ToString(), args[1]);
+            if defined(iOS) {
+                DatabaseService.Save(
+                    args[0].ToString(),
+                    JSON.ObjCObject.FromJSON(JSON.ScriptingValue.ToJSON(args[1]))
+                );
+            }
+            else {
+                DoSave(args[0].ToString(), args[1]);
+            }
             return null;
         }
 
-        object Delete(Fuse.Scripting.Context context, object[] args)
+        static object Delete(Fuse.Scripting.Context context, object[] args)
         {
-            DoSave(args[0].ToString(), null);
+            DatabaseService.SaveNull(args[0].ToString());
             return null;
         }
 
@@ -119,13 +134,5 @@ namespace Firebase.Database.JS
 			DatabaseService.Listen(path, ListenCallback);
 			return null;
 		}
-
-
-        static object LogIt(Context context, object[] args)
-        {
-            var message = (string)args[0];
-            // AnalyticsService.LogIt(message);
-            return null;
-        }
 	}
 }
