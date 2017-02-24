@@ -97,7 +97,7 @@ namespace Firebase.Authentication
             {
                 @{AuthStateChanged():Call()};
             };
-            return (id)Block_copy(_f);
+            return (id)_f;
         @}
 
 
