@@ -25,7 +25,7 @@ namespace Firebase.Authentication.Facebook
     {
         static bool _initd = false;
         extern(android) internal static Java.Object CallbackManager;
-        extern(iOS) internal static IntPtr LoginManager;
+        extern(iOS) internal static ObjC.Object LoginManager;
 
         public override AuthProviderName Name { get { return AuthProviderName.Facebook; } }
 
@@ -60,7 +60,7 @@ namespace Firebase.Authentication.Facebook
         public override void Start()
         @{
             FBSDKLoginManager* lm = [[FBSDKLoginManager alloc] init];
-            @{LoginManager:Set((__bridge void *)lm)};
+            @{LoginManager:Set(lm)};
         @}
 
         public override void SignOut()
@@ -82,8 +82,7 @@ namespace Firebase.Authentication.Facebook
         extern(iOS)
         public void SignOutInner()
         @{
-            id lm = @{LoginManager:Get()};
-            [lm logOut];
+            [@{LoginManager:Get()} logOut];
         @}
 
         public override Promise<string> ReAuthenticate(string ignored0, string ignored1)
