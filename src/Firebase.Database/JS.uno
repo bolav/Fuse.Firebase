@@ -22,7 +22,7 @@ namespace Firebase.Database.JS
 		public DatabaseModule() : base(false,"data")
 		{
 			if(_instance != null) return;
-			Resource.SetGlobalKey(_instance = this, "Firebase/Database");
+			Uno.UX.Resource.SetGlobalKey(_instance = this, "Firebase/Database");
 
             DatabaseService.Init();
 			var onData = new NativeEvent("onData");
@@ -70,7 +70,7 @@ namespace Firebase.Database.JS
                 DatabaseService.Save(path, arg as string);
                 return;
             }
-            else if (arg is double || arg is int) {
+            else if (arg is double || arg is int) {
                 DatabaseService.Save(path, Marshal.ToDouble(arg));
                 return;
             }
@@ -96,8 +96,17 @@ namespace Firebase.Database.JS
                     JSON.ObjCObject.FromJSON(JSON.ScriptingValue.ToJSON(args[1]))
                 );
             }
+            else if defined(Android) {
+                DatabaseService.Save(
+                    path + "/" + push_path,
+                    JSON.JavaObject.FromJSON(JSON.ScriptingValue.ToJSON(args[1]))
+                );
+            }
             else {
-                DoSave(path + "/" + push_path, args[1]);
+                DoSave(
+                    path + "/" + push_path,
+                    args[1]
+                );
             }
             return push_path;
         }
@@ -110,8 +119,17 @@ namespace Firebase.Database.JS
                     JSON.ObjCObject.FromJSON(JSON.ScriptingValue.ToJSON(args[1]))
                 );
             }
+            else if defined(Android) {
+                DatabaseService.Save(
+                    args[0].ToString(),
+                    JSON.JavaObject.FromJSON(JSON.ScriptingValue.ToJSON(args[1]))
+                );
+            }
             else {
-                DoSave(args[0].ToString(), args[1]);
+                DoSave(
+                    args[0].ToString(),
+                    args[1]
+                );
             }
             return null;
         }

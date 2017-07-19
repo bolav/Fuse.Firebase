@@ -19,7 +19,8 @@ namespace Firebase.Database
         "com.google.firebase.database.FirebaseDatabase",
         "com.google.firebase.database.ValueEventListener",
         "org.json.JSONObject",
-        "java.util.Map")]
+        "java.util.Map",
+        "java.util.HashMap")]
     [Require("Cocoapods.Podfile.Target", "pod 'Firebase/Database'")]
     [Require("Gradle.Dependency.Compile", "com.google.firebase:firebase-database:9.2.0")]
     [extern(iOS) Require("Source.Import","FirebaseDatabase/FIRDatabase.h")]
@@ -34,7 +35,7 @@ namespace Firebase.Database
         {
             if (!_initialized)
             {
-                Firebase.Core.Init();
+                // Firebase.Core.Init();
                 if defined(android) AndroidInit();
                 if defined(ios) iOSInit();
                 _initialized = true;
@@ -110,6 +111,14 @@ namespace Firebase.Database
             return _path.key;
         @}
 
+        [Foreign(Language.Java)]
+        extern(Android)
+        public static string NewChildId(string path)
+        @{
+            DatabaseReference ref = (DatabaseReference)@{DatabaseService._handle:Get()};
+            return ref.child(path).push().getKey();
+        @}
+
         [Foreign(Language.ObjC)]
         extern(iOS)
         public static void Save(string path, string[] keys, string[] vals, int len)
@@ -118,6 +127,18 @@ namespace Firebase.Database
             NSDictionary *param = [NSDictionary dictionaryWithObjects:[vals copyArray] forKeys:[keys copyArray]];
 
             [[ref child:path] setValue:param];
+        @}
+
+        [Foreign(Language.Java)]
+        extern(Android)
+        public static void Save(string path, string[] keys, string[] vals, int len)
+        @{
+            DatabaseReference ref = (DatabaseReference)@{DatabaseService._handle:Get()};
+            Map<String, String> values = new HashMap<String, String>();
+            for (int i = 0; i < len; i++) {
+                values.put(keys.get(i), vals.get(i));
+            }
+            ref.child(path).setValue(values);
         @}
 
         [Foreign(Language.ObjC)]
@@ -129,12 +150,29 @@ namespace Firebase.Database
             [[ref child:path] setValue:value];
         @}
 
+        [Foreign(Language.Java)]
+        extern(Android)
+        public static void Save(string path, Java.Object value)
+        @{
+            DatabaseReference ref = (DatabaseReference)@{DatabaseService._handle:Get()};
+
+            ref.child(path).setValue(value);
+        @}
+
         [Foreign(Language.ObjC)]
         extern(iOS)
         public static void Save(string path, string[] array)
         @{
             FIRDatabaseReference *ref = @{DatabaseService._handle:Get()};
             [[ref child:path] setValue:[array copyArray]];
+        @}
+
+        [Foreign(Language.Java)]
+        extern(Android)
+        public static void Save(string path, string[] array)
+        @{
+            DatabaseReference ref = (DatabaseReference)@{DatabaseService._handle:Get()};
+            ref.child(path).setValue(array);
         @}
 
         [Foreign(Language.ObjC)]
@@ -145,12 +183,28 @@ namespace Firebase.Database
             [[ref child:path] setValue:val];
         @}
 
+        [Foreign(Language.Java)]
+        extern(Android)
+        public static void Save(string path, string val)
+        @{
+            DatabaseReference ref = (DatabaseReference)@{DatabaseService._handle:Get()};
+            ref.child(path).setValue(val);
+        @}
+
         [Foreign(Language.ObjC)]
         extern(iOS)
         public static void Save(string path, double val)
         @{
             FIRDatabaseReference *ref = @{DatabaseService._handle:Get()};
             [[ref child:path] setValue:[NSNumber numberWithDouble:val]];
+        @}
+
+        [Foreign(Language.Java)]
+        extern(Android)
+        public static void Save(string path, double val)
+        @{
+            DatabaseReference ref = (DatabaseReference)@{DatabaseService._handle:Get()};
+            ref.child(path).setValue(val);
         @}
 
         [Foreign(Language.ObjC)]
@@ -161,7 +215,13 @@ namespace Firebase.Database
             [[ref child:path] setValue:nil];
         @}
 
-
+        [Foreign(Language.Java)]
+        extern(Android)
+        public static void SaveNull(string path)
+        @{
+            DatabaseReference ref = (DatabaseReference)@{DatabaseService._handle:Get()};
+            ref.child(path).setValue(null);
+        @}
 
 	}
 
